@@ -132,7 +132,10 @@
     ]
   ];
   //Sound
-  //var listener;
+  var pointAudio;
+  var bonusAudio;
+  var stoneAudio;
+  var hitGroundAudio;
 
   //state
   var is_playing;
@@ -205,7 +208,7 @@
     loadBonus();
     loadPoint();
     loadStones();
-    //loadSound();
+    loadSound();
 
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
@@ -492,6 +495,7 @@
               || (line[i][j].type == 2 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1)
               || (line[i][j].type == 3 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1))) {
               scene.remove(line[i][j].element);
+              onCollidePoint(line[i][j]);
               line[i].splice(j, 1);
           } else {
             line[i][j].element.position.x = -cosNum * pos_dist;
@@ -539,16 +543,19 @@
 
   init();
 
-  //function loadSound() {
-  //  listener = new THREE.AudioListener();
-  //  camera.add(listener);
-  //  var bgsound = new THREE.Audio( listener );
-  //  bgsound.load( 'images/music/music.mp3' );
-  //  bgsound.setRefDistance(20);
-  //  bgsound.autoplay = true;
-  //  bgsound.repeat = true;
-  //  scene.add(bgsound);
-  //}
+  function loadSound() {
+    pointAudio = document.createElement("audio");
+    pointAudio.src = "/images/music/note_2.mp3";
+
+    bonusAudio = document.createElement("audio");
+    bonusAudio.src = "/images/music/megagem_6.mp3";
+
+    stoneAudio = document.createElement("audio");
+    stoneAudio.src = "/images/music/cloud_hit.mp3";
+
+    hitGroundAudio = document.createElement("audio");
+    hitGroundAudio.src = "/images/music/ground_hit.mp3";    
+  }
 
   function UiStart() {
     var title = $("#ui-start");
@@ -557,7 +564,14 @@
 
   function onCollideGround() {
     is_playing = false;
+    hitGroundAudio.play();
     UiStart();
+  }
+
+  function onCollidePoint(element) {
+    if (element.type == 3) pointAudio.play();
+    else if (element.type == 2) bonusAudio.play();
+    else stoneAudio.play();
   }
 
 })();
