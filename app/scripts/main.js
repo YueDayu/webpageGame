@@ -64,7 +64,7 @@
     camera.position.y = 10;
     camera.lookAt({
       x : 0,
-      y : 5,
+      y : 1,
       z : 0
     });
     //TODO
@@ -103,8 +103,11 @@
   function loadPlane() {
     var loader = new THREE.JSONLoader();
     loader.load('images/model/plane.json', function(geometry, materials) {
-      var faceMaterial = new THREE.MeshFaceMaterial(materials);
-      plane = new THREE.Mesh(geometry, faceMaterial);
+      for ( var i = 0; i < materials.length; i++ ) {
+        var m = materials[i];
+        m.skinning = true;
+      }
+      plane = new THREE.SkinnedMesh(geometry, new THREE.MeshFaceMaterial(materials));
       plane.position.y = 8;
       var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
       animation.play();
@@ -177,10 +180,9 @@
   var clock = new THREE.Clock();
 
   function animate() {
-
     requestAnimationFrame(animate);
     var delta = clock.getDelta();
-    //THREE.AnimationHandler.update(delta);
+    THREE.AnimationHandler.update(3 * delta);
     plane_fly();
     controls.update();
     renderer.render(scene, camera);
