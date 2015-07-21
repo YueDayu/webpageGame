@@ -136,6 +136,7 @@
   var bonusAudio;
   var stoneAudio;
   var hitGroundAudio;
+  var engineAudio;
 
   //state
   var is_playing;
@@ -218,6 +219,7 @@
           is_playing = true;
           reset();
         } else {
+          engineAudio.play();
           if (plane && plane.position.y < 40) {
             if (fly_degree > 90 || fly_degree < -90) {
               d_speed = 0.3;
@@ -230,6 +232,8 @@
     });
     $(window).keyup(function(e) {
       if (e.which == 32) {
+        engineAudio.pause();
+        engineAudio.fastSeek(0);
         d_speed = -0.2;
       }
     });
@@ -554,7 +558,11 @@
     stoneAudio.src = "/images/music/cloud_hit.mp3";
 
     hitGroundAudio = document.createElement("audio");
-    hitGroundAudio.src = "/images/music/ground_hit.mp3";    
+    hitGroundAudio.src = "/images/music/ground_hit.mp3";
+
+    engineAudio = document.createElement("audio");
+    engineAudio.src = "/images/music/engine.mp3";
+    engineAudio.setAttribute("loop", true);
   }
 
   function UiStart() {
