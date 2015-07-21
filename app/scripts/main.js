@@ -196,8 +196,8 @@
       z : 0
     });
     //TODO
-    controls = new THREE.OrbitControls( camera );
-    controls.center.set( 0, 0, 0 );
+    //controls = new THREE.OrbitControls( camera );
+    //controls.center.set( 0, 0, 0 );
     //TODO
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -571,7 +571,7 @@
     var delta = clock.getDelta();
     THREE.AnimationHandler.update(3 * delta);
     if (is_playing) plane_fly();
-    controls.update();
+    //controls.update();
     renderer.render(scene, camera);
   }
 
