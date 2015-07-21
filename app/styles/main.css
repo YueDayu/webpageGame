@@ -100,3 +100,35 @@ canvas {
     transform: translateZ(0.5em);
   }
 }
+
+@-webkit-keyframes ui-start-anim /* Safari 和 Chrome */
+{
+0%   {-webkit-transform: scale(1);}
+50%  {-webkit-transform: scale(1.1);}
+100% {-webkit-transform: scale(1);}
+}
+
+
+
+#ui-start {
+  animation: ui-start-anim 1s infinite linear;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -252px;
+  margin-top: -42px;
+  vertical-align: middle;
+  z-index: 9999;
+}
+
+#ui-start p {
+  text-align: center;
+  font-size: 60px;
+  font-family: sans-serif;
+  font-weight: bolder;
+  color: white;
+  margin: 0;
+  -webkit-text-stroke: 4px #444444;
+}
+
+

@@ -39,6 +39,12 @@
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
 
+  //Sound
+  var listener;
+
+  //state
+  var is_playing;
+
   function addEnvMap(scene) {
     var urls = [
       'images/pics/0004.png',
@@ -68,11 +74,14 @@
     if (currentNum >= loadNum) {
       $('#loading').fadeOut();
       putElements();
+      UiStart();
     }
   }
   var controls;
 
   function init() {
+    $("#ui-start").hide();
+
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = -4;
@@ -107,15 +116,22 @@
     //loadHorse();
     //initObject();
     //loadBirds();
+    loadSound();
 
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
       if (e.which == 32) {
-        if (plane && plane.position.y < 40) {
-          if (fly_degree > 90 || fly_degree < -90) {
-            d_speed = 0.3;
-          } else {
-            d_speed = 0.15;
+        if (!is_playing) {
+          is_playing = true;
+          $('#ui-start').hide();
+        }
+        else {
+          if (plane && plane.position.y < 40) {
+            if (fly_degree > 90 || fly_degree < -90) {
+              d_speed = 0.3;
+            } else {
+              d_speed = 0.15;
+            }
           }
         }
       }
@@ -125,6 +141,9 @@
         d_speed = -0.15;
       }
     });
+
+    is_playing = false;
+
     animate();
   }
 
@@ -327,6 +346,7 @@
       plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
       if (plane.position.y <= 0) {
         plane.position.y = 0;
+        onCollideGround();
       }
 
       plane.rotation.x = fly_degree * Math.PI / 180;
@@ -349,7 +369,7 @@
     requestAnimationFrame(animate);
     var delta = clock.getDelta();
     THREE.AnimationHandler.update(3 * delta);
-    plane_fly();
+    if (is_playing) plane_fly();
     controls.update();
     renderer.render(scene, camera);
   }
@@ -361,4 +381,25 @@
   }
 
   init();
+
+  function loadSound() {
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+    var bgsound = new THREE.Audio( listener );
+    bgsound.load( 'images/music/music.mp3' );
+    bgsound.setRefDistance(20);
+    bgsound.autoplay = true;
+    scene.add(bgsound);
+  }
+
+  function UiStart() {
+    var title = $("#ui-start");
+    title.show();
+  }
+
+  function onCollideGround() {
+    is_playing = false;
+    UiStart();
+  }
+
 })();
