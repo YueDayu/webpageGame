@@ -56,7 +56,7 @@
 
   function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = 0;
     camera.position.x = 65;
     camera.position.y = 10;
@@ -74,7 +74,7 @@
     document.getElementById('container').appendChild(renderer.domElement);
     pointLight = new THREE.PointLight( 0xaaaaaa, 0.75 );
     pointLight.position.set( -100, 100, 100 );
-    pointLight.position.multiplyScalar( 90 );
+    pointLight.position.multiplyScalar(90);
     scene.add(pointLight);
     ambientLight = new THREE.AmbientLight(0xaaaaaa);
     scene.add(ambientLight);
@@ -101,14 +101,15 @@
   function loadPlane() {
     var loader = new THREE.JSONLoader();
     loader.load('images/model/plane.json', function(geometry, materials) {
-      plane = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+      var faceMaterial = new THREE.MeshFaceMaterial(materials);
+      plane = new THREE.Mesh(geometry, faceMaterial);
+      //plane.skinning = true;
       plane.position.y = 10;
       var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
       animation.play();
-      plane.scale.set(0.5, 0.5, 0.5);
+      //plane.scale.set(0.5, 0.5, 0.5);
       //plane.position.y = 8;
       plane.position.x = pos_dist;
-      console.log(Math.atan(plane.position.z / plane.position.x));
       //plane.rotation.y = 90 * Math.PI / 180;
       scene.add(plane);
       hideLoadding();
@@ -157,13 +158,15 @@
       } else {
         now_degree = Math.atan(plane.position.z / plane.position.x) + Math.PI;
       }
-      plane.position.x += Math.sin(now_degree) * fly_speed;
-      plane.position.z -= Math.cos(now_degree) * fly_speed;
+      plane.position.x += Math.sin(now_degree) * (fly_speed * Math.cos(fly_degree * Math.PI / 180));
+      plane.position.z -= Math.cos(now_degree) * (fly_speed * Math.cos(fly_degree * Math.PI / 180));
+      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
       //plane.rotation.x = Math.PI / 2;
       //plane.rotation.z = Math.PI / 2;
       plane.rotation.y = -now_degree + Math.PI;
       camera.position.x = plane.position.x * 1.2 + Math.sin(now_degree) * 7;
       camera.position.z = plane.position.z * 1.2 - Math.cos(now_degree) * 7;
+      camera.position.y = plane.position.y * 1.2;
       //plane.rotation.z = fly_degree * Math.PI / 180;
       //plane.rotateX (0.0001);
       //plane.rotation.z = -fly_degree * Math.PI / 180 * Math.sin(now_degree);
@@ -178,10 +181,11 @@
   var clock = new THREE.Clock();
 
   function animate() {
-    plane_fly();
+
     requestAnimationFrame(animate);
-    //var delta = clock.getDelta();
+    var delta = clock.getDelta();
     //THREE.AnimationHandler.update(delta);
+    plane_fly();
     controls.update();
     renderer.render(scene, camera);
   }
