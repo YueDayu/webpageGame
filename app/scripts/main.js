@@ -21,9 +21,10 @@
     {x:5, y:4, z:30},
     {x:10, y:5.1, z:25},
     {x:8, y:3, z:33}];
-  var stonesGeometry, stonesMaterial, stones = [];
-  var pointGeometry, pointMaterial, points = [];
-  var bonusGeometry, bonusMaterial, bonuses = [];
+  var line = [];
+  var stonesGeometry, stonesMaterial;
+  var pointGeometry, pointMaterial;
+  var bonusGeometry, bonusMaterial;
   //scene element
   var scene;
   var camera;
@@ -31,7 +32,7 @@
   var ambientLight;
   var pointLight;
   //game control
-  var fly_speed = 0.1;
+  var fly_speed = 0.2;
   var a_speed = 0;
   var d_speed = -1;
   var fly_degree = 0;
@@ -66,6 +67,7 @@
     currentNum++;
     if (currentNum >= loadNum) {
       $('#loading').fadeOut();
+      putElements();
     }
   }
   var controls;
@@ -89,10 +91,10 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('container').appendChild(renderer.domElement);
     pointLight = new THREE.PointLight( 0xaaaaaa, 0.75 );
-    pointLight.position.set( -100, 100, 100 );
-    pointLight.position.multiplyScalar(90);
+    pointLight.position.set( 100, 100, 0 );
+    pointLight.position.multiplyScalar(300);
     scene.add(pointLight);
-    ambientLight = new THREE.AmbientLight(0xaaaaaa);
+    ambientLight = new THREE.AmbientLight(0x999999);
     scene.add(ambientLight);
 
     addEnvMap(scene);
@@ -109,10 +111,12 @@
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
       if (e.which == 32) {
-        if (fly_degree > 90 || fly_degree < -90) {
-          d_speed = 0.3;
-        } else {
-          d_speed = 0.15;
+        if (plane && plane.position.y < 40) {
+          if (fly_degree > 90 || fly_degree < -90) {
+            d_speed = 0.3;
+          } else {
+            d_speed = 0.15;
+          }
         }
       }
     });
@@ -256,6 +260,24 @@
     });
   }
 
+  function putElements() {
+    for (var i = 0; i < 160; i++) {
+      var point = new THREE.Mesh(stonesGeometry, stonesMaterial);
+      point.position.x = pos_dist * Math.cos(2 * Math.PI * i / 160);
+      point.position.z = pos_dist * Math.sin(2 * Math.PI * i / 160);
+      point.position.y = Math.sin(i / 160 * Math.PI) * 20 + 2;
+      scene.add(point);
+      var tempElem = {
+        type: 1,
+        element: point
+      };
+      var temp = [];
+      temp.push(tempElem);
+      line.push(temp);
+      //scene.remove(point);
+    }
+  }
+
   function plane_fly() {
     a_speed += d_speed;
     if (d_speed >= 0.3 && a_speed < -2.5) {
@@ -281,11 +303,31 @@
         fly_degree = -90;
     }
     //TODO: debug
-    fly_degree = 0;
+    //fly_degree = 0;
     if(currentNum >= loadNum) {
       var deg = Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
       island.rotation.y -= deg;
-      //plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
+      var cosNum = Math.cos(island.rotation.y);
+      var sinNum = Math.sin(island.rotation.y);
+      pointLight.position.x = -Math.cos(island.rotation.y) * 50;
+      pointLight.position.z = Math.sin(island.rotation.y) * 50;
+      for (var i = 0; i < line.length; i++) {
+        for (var j = 0; j < line[i].length; j++) {
+          if (line[i][j].element.position.x > 48 && line[i][j].element.position.z > -2
+            && line[i][j].element.position.z < 0 && Math.abs(line[i][j].element.position.y - plane.position.y) < 2) {
+            scene.remove(line[i][j].element);
+            line[i].splice(j, 1);
+          } else {
+            line[i][j].element.position.x = -Math.cos(island.rotation.y + 2 * Math.PI * i / line.length) * pos_dist;
+            line[i][j].element.position.z = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length) * pos_dist;
+            line[i][j].element.rotation.y = (island.rotation.y + 2 *Math.PI * i / line.length);
+          }
+        }
+      }
+      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
+      if (plane.position.y <= 0) {
+        plane.position.y = 0;
+      }
 
       plane.rotation.x = fly_degree * Math.PI / 180;
       var pos = plane.position.y * 1.1;
