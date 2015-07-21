@@ -172,7 +172,7 @@
   var controls;
 
   function init() {
-    $("#ui-start").hide();
+    $("#ui-start").fadeOut();
 
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
@@ -211,9 +211,9 @@
     $(window).keydown(function(e) {
       if (e.which == 32 && currentNum >= loadNum) {
         if (!is_playing) {
+          $('#ui-start').hide();
           is_playing = true;
           reset();
-          $('#ui-start').hide();
         } else {
           if (plane && plane.position.y < 40) {
             if (fly_degree > 90 || fly_degree < -90) {
@@ -552,7 +552,7 @@
 
   function UiStart() {
     var title = $("#ui-start");
-    title.show();
+    title.fadeIn();
   }
 
   function onCollideGround() {
