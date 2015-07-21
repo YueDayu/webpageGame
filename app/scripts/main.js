@@ -38,6 +38,11 @@
   var fly_degree = 0;
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
+  var current_put_level = 2;
+  var current_map_index = 0;
+  var current_put_index = 0;
+  var empty = 0;
+  var float_h = 0;
 
   //type: 1 stone | 2 bonus | 3 point
   //maps
@@ -127,7 +132,7 @@
     ]
   ];
   //Sound
-  var listener;
+  //var listener;
 
   //state
   var is_playing;
@@ -200,19 +205,16 @@
     loadBonus();
     loadPoint();
     loadStones();
-    //loadHorse();
-    //initObject();
-    //loadBirds();
-    loadSound();
+    //loadSound();
 
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
-      if (e.which == 32) {
+      if (e.which == 32 && currentNum >= loadNum) {
         if (!is_playing) {
           is_playing = true;
+          reset();
           $('#ui-start').hide();
-        }
-        else {
+        } else {
           if (plane && plane.position.y < 40) {
             if (fly_degree > 90 || fly_degree < -90) {
               d_speed = 0.3;
@@ -251,6 +253,27 @@
       scene.add(plane);
       hideLoadding();
     });
+  }
+
+  function reset() {
+    for (var i = 0; i < line.length; i++) {
+      for (var j = 0; j < line[i].length; j++) {
+        scene.remove(line[i][j].element);
+      }
+    }
+    line.length = 0;
+    current_put_level = 2;
+    current_map_index = 0;
+    current_put_index = 0;
+    empty = 0;
+    float_h = 0;
+    putElements();
+    plane.position.y = 8;
+    plane.scale.set(0.5, 0.5, 0.5);
+    plane.position.x = pos_dist;
+    plane.rotation.y = Math.PI;
+    fly_degree = 0;
+    a_speed = 0;
   }
 
   //function loadBirds() {
@@ -370,12 +393,6 @@
       line.push(temp);
     }
   }
-
-  var current_put_level = 2;
-  var current_map_index = 0;
-  var current_put_index = 0;
-  var empty = 0;
-  var float_h = 0;
 
   function plane_fly() {
     a_speed += d_speed;
@@ -522,15 +539,16 @@
 
   init();
 
-  function loadSound() {
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    var bgsound = new THREE.Audio( listener );
-    bgsound.load( 'images/music/music.mp3' );
-    bgsound.setRefDistance(20);
-    bgsound.autoplay = true;
-    scene.add(bgsound);
-  }
+  //function loadSound() {
+  //  listener = new THREE.AudioListener();
+  //  camera.add(listener);
+  //  var bgsound = new THREE.Audio( listener );
+  //  bgsound.load( 'images/music/music.mp3' );
+  //  bgsound.setRefDistance(20);
+  //  bgsound.autoplay = true;
+  //  bgsound.repeat = true;
+  //  scene.add(bgsound);
+  //}
 
   function UiStart() {
     var title = $("#ui-start");
