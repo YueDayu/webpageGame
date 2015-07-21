@@ -233,7 +233,6 @@
     $(window).keyup(function(e) {
       if (e.which == 32) {
         engineAudio.pause();
-        engineAudio.fastSeek(0);
         d_speed = -0.2;
       }
     });
