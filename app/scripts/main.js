@@ -17,7 +17,7 @@
   var ambientLight;
   var pointLight;
   //game control
-  var fly_speed;
+  var fly_speed = 0.05;
   var fly_degree = 0;
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
@@ -57,8 +57,8 @@
   function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
-    camera.position.z = 65;
-    camera.position.x = 0;
+    camera.position.z = 0;
+    camera.position.x = 65;
     camera.position.y = 10;
     camera.lookAt({
       x : 0,
@@ -87,7 +87,13 @@
 
     window.addEventListener('resize', onWindowResize, false);
     $(window).keypress(function(e) {
-      console.log(e.which);
+      if (e.which == 32) {
+          fly_degree += 5;
+        if (fly_degree == 180) fly_degree++;
+        if (fly_degree >= 180) {
+          fly_degree = -179;
+        }
+      }
     });
     animate();
   }
@@ -97,12 +103,13 @@
     loader.load('images/model/plane.json', function(geometry, materials) {
       plane = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
       plane.position.y = 10;
-      //var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
-      //animation.play();
+      var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
+      animation.play();
       plane.scale.set(0.5, 0.5, 0.5);
-      plane.position.y = 8;
-      plane.position.z = 50;
-      plane.rotation.y = 90 * Math.PI / 180;
+      //plane.position.y = 8;
+      plane.position.x = pos_dist;
+      console.log(Math.atan(plane.position.z / plane.position.x));
+      //plane.rotation.y = 90 * Math.PI / 180;
       scene.add(plane);
       hideLoadding();
     });
@@ -144,12 +151,27 @@
 
   function plane_fly() {
     if(plane) {
-      if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
-        model_rot_dir = -model_rot_dir;
+      var now_degree;
+      if (plane.position.x > 0) {
+        now_degree = Math.atan(plane.position.z / plane.position.x);
+      } else {
+        now_degree = Math.atan(plane.position.z / plane.position.x) + Math.PI;
       }
-      var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
-      plane.rotation.z += model_rot_dir * rot_delta;
-      plane.rotation.x = fly_degree;
+      plane.position.x += Math.sin(now_degree) * fly_speed;
+      plane.position.z -= Math.cos(now_degree) * fly_speed;
+      //plane.rotation.x = Math.PI / 2;
+      //plane.rotation.z = Math.PI / 2;
+      plane.rotation.y = -now_degree + Math.PI;
+      camera.position.x = plane.position.x * 1.2 + Math.sin(now_degree) * 7;
+      camera.position.z = plane.position.z * 1.2 - Math.cos(now_degree) * 7;
+      //plane.rotation.z = fly_degree * Math.PI / 180;
+      //plane.rotateX (0.0001);
+      //plane.rotation.z = -fly_degree * Math.PI / 180 * Math.sin(now_degree);
+      //if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
+      //  model_rot_dir = -model_rot_dir;
+      //}
+      //var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
+      //plane.rotation.z += model_rot_dir * rot_delta;
     }
   }
 
