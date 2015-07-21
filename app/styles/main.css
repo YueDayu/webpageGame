@@ -144,3 +144,30 @@ h1:before {
   font-family: Scratch Decor;
   color: purple;
 }
+
+#score {
+  text-align: center;
+  position: absolute;
+  background: url('../images/pics/sprite_final_score_bg.png') no-repeat fixed top;
+  z-index: 10000;
+  width: 100%;
+  height: 100%;
+  color: #ffffff;
+  font-size: 2.7em;
+}
+
+#no-fuel {
+  position: fixed;
+  background: url('../images/pics/no_fuel.png') no-repeat fixed center;
+  z-index: 10002;
+  width: 100%;
+  height: 100%;
+}
+
+#bar {
+  position: absolute;
+  width: 117px;
+  height: 13px;
+  margin-left: -56px;
+  margin-top: 13px;
+}

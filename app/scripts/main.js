@@ -32,17 +32,23 @@
   var ambientLight;
   var pointLight;
   //game control
-  var fly_speed = 0.2;
+  var fly_speed = 0.15;
   var a_speed = 0;
   var d_speed = -1;
   var fly_degree = 0;
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
-  var current_put_level = 2;
+  var current_put_level = 0;
   var current_map_index = 0;
   var current_put_index = 0;
   var empty = 0;
   var float_h = 0;
+  var score = 0;
+  var fuel = 100;
+  var c = document.getElementById("bar");
+  var showFuelBar = c.getContext("2d");
+  showFuelBar.fillStyle="#FF0000";
+  showFuelBar.fillRect(0, 0, 300, 200);
 
   //type: 1 stone | 2 bonus | 3 point
   //maps
@@ -53,7 +59,7 @@
         [{type: 3, h: 12}],
         [{type: 3, h: 14}],
         [{type: 3, h: 15}],
-        [{type: 2, h: 15.5}, {type: 3, h: 11}],
+        [{type: 3, h: 15.5}, {type: 1, h: 11}],
         [{type: 3, h: 15}],
         [{type: 3, h: 14}],
         [{type: 3, h: 12}],
@@ -169,6 +175,7 @@
     currentNum++;
     if (currentNum >= loadNum) {
       $('#loading').fadeOut();
+      $('#score').fadeIn();
       putElements();
       UiStart();
     }
@@ -185,7 +192,7 @@
     camera.position.y = 10;
     camera.lookAt({
       x : 0,
-      y : 5,
+      y : 10,
       z : 0
     });
     //TODO
@@ -219,12 +226,14 @@
           is_playing = true;
           reset();
         } else {
-          engineAudio.play();
-          if (plane && plane.position.y < 40) {
-            if (fly_degree > 90 || fly_degree < -90) {
-              d_speed = 0.3;
-            } else {
-              d_speed = 0.2;
+          if (fuel > 0) {
+            engineAudio.play();
+            if (plane && plane.position.y < 40) {
+              if (fly_degree > 90 || fly_degree < -90) {
+                d_speed = 0.3;
+              } else {
+                d_speed = 0.2;
+              }
             }
           }
         }
@@ -268,7 +277,7 @@
       }
     }
     line.length = 0;
-    current_put_level = 2;
+    current_put_level = 0;
     current_map_index = 0;
     current_put_index = 0;
     empty = 0;
@@ -280,6 +289,9 @@
     plane.rotation.y = Math.PI;
     fly_degree = 0;
     a_speed = 0;
+    score = 0;
+    fuel = 100;
+    $('#show')[0].innerHTML = '0';
   }
 
   //function loadBirds() {
@@ -401,6 +413,24 @@
   }
 
   function plane_fly() {
+    if (score < 50) {
+      current_put_level = 0;
+    } else if (score < 130) {
+      current_put_level = 1;
+    } else {
+      current_put_level = 2;
+    }
+    fuel -= 0.03;
+    showFuelBar.fillStyle = "#000000";
+    showFuelBar.fillRect(0, 0, 300, 200);
+    showFuelBar.fillStyle = "#FF0000";
+    showFuelBar.fillRect(0, 0, fuel * 3, 200);
+    if (fuel > 10) {
+      $('#no-fuel').hide();
+    } else {
+      $('#no-fuel').show();
+    }
+    //console.log(fuel);
     a_speed += d_speed;
     if (d_speed >= 0.3 && a_speed < -2.5) {
       a_speed = -2.5;
@@ -461,7 +491,6 @@
               for (var j = 0; j < maps[current_put_level][current_map_index][current_put_index].length; j++) {
                 var point;
                 var tempElem;
-                console.log(maps[current_put_level][current_map_index]);
                 if (maps[current_put_level][current_map_index][current_put_index][j].type == 1) {
                   point = new THREE.Mesh(stonesGeometry, stonesMaterial);
                   scene.add(point);
@@ -497,6 +526,14 @@
               && ((line[i][j].type == 1 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1.5)
               || (line[i][j].type == 2 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1)
               || (line[i][j].type == 3 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1))) {
+              if(line[i][j].type == 3) {
+                score++;
+              } else if (line[i][j].type == 1) {
+                fuel -= 10;
+              } else {
+                fuel += 10;
+              }
+              $('#show')[0].innerHTML = score;
               scene.remove(line[i][j].element);
               onCollidePoint(line[i][j]);
               line[i].splice(j, 1);
@@ -566,6 +603,7 @@
 
   function UiStart() {
     var title = $("#ui-start");
+    $('#no-fuel').hide();
     title.fadeIn();
   }
 
