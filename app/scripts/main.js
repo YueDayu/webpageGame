@@ -99,8 +99,11 @@
 
     loadPlane();
     loadIsland();
+    loadBonus();
+    loadPoint();
+    loadStones();
     //loadHorse();
-    initObject();
+    //initObject();
     //loadBirds();
 
     window.addEventListener('resize', onWindowResize, false);
@@ -218,6 +221,8 @@
       bonusGeometry = geometry;
       bonusMaterial = new THREE.MeshFaceMaterial(materials);
       var bonus = new THREE.Mesh(geometry, bonusMaterial);
+      bonus.position.x = 50;
+      bonus.position.y = 10;
       scene.add(bonus);
 
       hideLoadding();
@@ -228,7 +233,11 @@
     var loader = new THREE.JSONLoader();
     loader.load('images/model/stone.json', function(geometry, materials) {
       stonesGeometry = geometry;
-      stonesMaterial = materials;
+      stonesMaterial = new THREE.MeshFaceMaterial(materials);
+      var stone = new THREE.Mesh(geometry, stonesMaterial);
+      stone.position.x = 50;
+      stone.position.y = 12;
+      scene.add(stone);
 
       hideLoadding();
     });
@@ -238,8 +247,11 @@
     var loader = new THREE.JSONLoader();
     loader.load('images/model/point.json', function(geometry, materials) {
       pointGeometry = geometry;
-      pointMaterial = materials;
-
+      pointMaterial = new THREE.MeshFaceMaterial(materials);
+      var point = new THREE.Mesh(geometry, pointMaterial);
+      point.position.x = 50;
+      point.position.y = 14;
+      scene.add(point);
       hideLoadding();
     });
   }
@@ -268,18 +280,12 @@
     if (d_speed < 0 && fly_degree >= -90 + a_speed && fly_degree <= -90 - a_speed) {
         fly_degree = -90;
     }
-    //fly_degree = 0;
-    if(plane && island && skybox) {
+    //TODO: debug
+    fly_degree = 0;
+    if(currentNum >= loadNum) {
       var deg = Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
       island.rotation.y -= deg;
-      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
-
-      //for (var i = 0; i < birdsNum; i++) {
-      //  var dist = Math.sqrt(birdList[i].position.x * birdList[i].position.x + birdList[i].position.z * birdList[i].position.z);
-      //  birdList[i].position.x += dx;
-      //  birdList[i].position.z += dz;
-      //  birdList[i].rotation.y -= deg;
-      //}
+      //plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
 
       plane.rotation.x = fly_degree * Math.PI / 180;
       var pos = plane.position.y * 1.1;
@@ -301,7 +307,7 @@
     requestAnimationFrame(animate);
     var delta = clock.getDelta();
     THREE.AnimationHandler.update(3 * delta);
-    //plane_fly();
+    plane_fly();
     controls.update();
     renderer.render(scene, camera);
   }
