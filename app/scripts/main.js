@@ -17,7 +17,9 @@
   var ambientLight;
   var pointLight;
   //game control
-  var fly_speed = 0.05;
+  var fly_speed_x = 0.1;
+  var fly_speed_y = 0;
+  var g = 0.01;
   var fly_degree = 0;
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
@@ -42,7 +44,7 @@
       depthWrite: false,
       side: THREE.BackSide
     });
-    var skybox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
+    skybox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
     scene.add(skybox);
   }
 
@@ -57,12 +59,12 @@
   function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
-    camera.position.z = 0;
-    camera.position.x = 65;
+    camera.position.z = -5;
+    camera.position.x = 60;
     camera.position.y = 10;
     camera.lookAt({
       x : 0,
-      y : 0,
+      y : 5,
       z : 0
     });
     //TODO
@@ -86,9 +88,9 @@
     initObject();
 
     window.addEventListener('resize', onWindowResize, false);
-    $(window).keypress(function(e) {
+    $(window).keydown(function(e) {
       if (e.which == 32) {
-          fly_degree += 5;
+        fly_degree += 3;
         if (fly_degree == 180) fly_degree++;
         if (fly_degree >= 180) {
           fly_degree = -179;
@@ -103,15 +105,14 @@
     loader.load('images/model/plane.json', function(geometry, materials) {
       var faceMaterial = new THREE.MeshFaceMaterial(materials);
       plane = new THREE.Mesh(geometry, faceMaterial);
-      //plane.skinning = true;
-      plane.position.y = 10;
+      plane.position.y = 8;
       var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
       animation.play();
-      //plane.scale.set(0.5, 0.5, 0.5);
-      //plane.position.y = 8;
+      plane.scale.set(0.5, 0.5, 0.5);
       plane.position.x = pos_dist;
-      //plane.rotation.y = 90 * Math.PI / 180;
+      plane.rotation.y = Math.PI;
       scene.add(plane);
+      console.log(plane.rotation);
       hideLoadding();
     });
   }
@@ -151,30 +152,25 @@
   }
 
   function plane_fly() {
-    if(plane) {
-      var now_degree;
-      if (plane.position.x > 0) {
-        now_degree = Math.atan(plane.position.z / plane.position.x);
+    if(plane && island && skybox) {
+      var now_degree = island.rotation.y;
+      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed_x * 1.5;
+      var dx = Math.sin(now_degree) * (fly_speed_x * Math.cos(fly_degree * Math.PI / 180));
+      var dz = -(Math.cos(now_degree) * (fly_speed_x * Math.cos(fly_degree * Math.PI / 180)));
+      var deg;
+      if (fly_degree > -90 && fly_degree < 90) {
+        deg = -Math.atan(Math.sqrt(dx * dx + dz * dz) / pos_dist);
       } else {
-        now_degree = Math.atan(plane.position.z / plane.position.x) + Math.PI;
+        deg = Math.atan(Math.sqrt(dx * dx + dz * dz) / pos_dist);
       }
-      plane.position.x += Math.sin(now_degree) * (fly_speed * Math.cos(fly_degree * Math.PI / 180));
-      plane.position.z -= Math.cos(now_degree) * (fly_speed * Math.cos(fly_degree * Math.PI / 180));
-      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
-      //plane.rotation.x = Math.PI / 2;
-      //plane.rotation.z = Math.PI / 2;
-      plane.rotation.y = -now_degree + Math.PI;
-      camera.position.x = plane.position.x * 1.2 + Math.sin(now_degree) * 7;
-      camera.position.z = plane.position.z * 1.2 - Math.cos(now_degree) * 7;
-      camera.position.y = plane.position.y * 1.2;
-      //plane.rotation.z = fly_degree * Math.PI / 180;
-      //plane.rotateX (0.0001);
-      //plane.rotation.z = -fly_degree * Math.PI / 180 * Math.sin(now_degree);
-      //if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
-      //  model_rot_dir = -model_rot_dir;
-      //}
-      //var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
-      //plane.rotation.z += model_rot_dir * rot_delta;
+      island.rotation.y += deg;
+      plane.rotation.x = fly_degree * Math.PI / 180;
+      camera.position.y = plane.position.y;
+      if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
+        model_rot_dir = -model_rot_dir;
+      }
+      var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
+      plane.rotation.z += model_rot_dir * rot_delta;
     }
   }
 
