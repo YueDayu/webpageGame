@@ -39,6 +39,94 @@
   var pos_dist = 50; //distance to the y-axis
   var model_rot_dir = 1;
 
+  //type: 1 stone | 2 bonus | 3 point
+  //maps
+  var maps = [ //level 1-3
+    [
+      [
+        [{type: 3, h: 10}],
+        [{type: 3, h: 12}],
+        [{type: 3, h: 14}],
+        [{type: 3, h: 15}],
+        [{type: 2, h: 15.5}, {type: 3, h: 11}],
+        [{type: 3, h: 15}],
+        [{type: 3, h: 14}],
+        [{type: 3, h: 12}],
+        [{type: 2, h: 10}]
+      ],[
+      [{type: 3, h: 13}],
+      [{type: 3, h: 14}],
+      [{type: 3, h: 15}],
+      [{type: 3, h: 16}],
+      [{type: 3, h: 17}, {type: 1, h: 21}],
+      [{type: 3, h: 18}],
+      [{type: 3, h: 19}],
+      [{type: 2, h: 20}, {type: 1, h: 16}],
+      [{type: 3, h: 19}],
+      [{type: 3, h: 18}],
+      [{type: 3, h: 17}, {type: 1, h: 21}],
+      [{type: 3, h: 16}],
+      [{type: 3, h: 15}],
+      [{type: 3, h: 14}],
+      [{type: 3, h: 13}]
+    ],[
+      [{type: 3, h: 10}],
+      [{type: 3, h: 12}],
+      [{type: 3, h: 14}],
+      [{type: 3, h: 16}],
+      [{type: 3, h: 18}],
+      [{type: 3, h: 19}],
+      [{type: 2, h: 20}, {type: 1, h: 17}]
+    ]
+    ],[
+      [
+        [{type: 3, h: 10}],
+        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 18}],
+        [{type: 3, h: 10}, {type: 3, h: 19}],
+        [{type: 3, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 2, h: 19}],
+        [{type: 3, h: 10}, {type: 3, h: 19}],
+        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 18}],
+        [{type: 3, h: 10}]
+      ],
+      [
+        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}],
+        [{type: 3, h: 10}, {type: 3, h: 16}],
+        [{type: 2, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}],
+        [{type: 3, h: 10}, {type: 3, h: 16}],
+        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}]
+      ],
+      [
+        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 19}],
+        [{type: 3, h: 10}, {type: 3, h: 20}, {type: 1, h: 13}, {type: 1, h: 18}, {type: 3, h: 15}],
+        [{type: 3, h: 10}, {type: 2, h: 15}, {type: 3, h: 17}],
+        [{type: 3, h: 10}, {type: 1, h: 14}],
+        [{type: 3, h: 10}]
+      ]
+    ],[
+      [
+        [{type: 1, h: 11}],
+        [{type: 1, h: 12.5}, {type: 3, h: 9}],
+        [{type: 1, h: 7}, {type: 3, h: 11}, {type: 1, h: 15}],
+        [{type: 1, h: 9}, {type: 1, h: 17.5}, {type: 3, h: 13}],
+        [{type: 2, h: 14}]
+      ],
+      [
+        [{type: 1, h: 10}, {type: 1, h: 15}, {type: 1, h: 20}],
+        [{type: 3, h: 10}, {type: 3, h: 15}, {type: 3, h: 20}],
+        [{type: 3, h: 10}, {type: 2, h: 15}, {type: 3, h: 20}],
+        [{type: 3, h: 10}, {type: 3, h: 15}, {type: 3, h: 20}],
+        [{type: 1, h: 10}, {type: 1, h: 15}, {type: 1, h: 20}]
+      ],
+      [
+        [{type: 1, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 1, h: 19}],
+        [{type: 3, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
+        [{type: 2, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
+        [{type: 3, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
+        [{type: 1, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 1, h: 19}]
+      ]
+    ]
+  ];
+
   function addEnvMap(scene) {
     var urls = [
       'images/pics/0004.png',
@@ -80,7 +168,7 @@
     camera.position.y = 10;
     camera.lookAt({
       x : 0,
-      y : 3,
+      y : 5,
       z : 0
     });
     //TODO
@@ -115,14 +203,14 @@
           if (fly_degree > 90 || fly_degree < -90) {
             d_speed = 0.3;
           } else {
-            d_speed = 0.15;
+            d_speed = 0.2;
           }
         }
       }
     });
     $(window).keyup(function(e) {
       if (e.which == 32) {
-        d_speed = -0.15;
+        d_speed = -0.2;
       }
     });
     animate();
@@ -224,10 +312,6 @@
     loader.load('images/model/bonus.json', function(geometry, materials) {
       bonusGeometry = geometry;
       bonusMaterial = new THREE.MeshFaceMaterial(materials);
-      var bonus = new THREE.Mesh(geometry, bonusMaterial);
-      bonus.position.x = 50;
-      bonus.position.y = 10;
-      scene.add(bonus);
 
       hideLoadding();
     });
@@ -238,10 +322,6 @@
     loader.load('images/model/stone.json', function(geometry, materials) {
       stonesGeometry = geometry;
       stonesMaterial = new THREE.MeshFaceMaterial(materials);
-      var stone = new THREE.Mesh(geometry, stonesMaterial);
-      stone.position.x = 50;
-      stone.position.y = 12;
-      scene.add(stone);
 
       hideLoadding();
     });
@@ -252,20 +332,16 @@
     loader.load('images/model/point.json', function(geometry, materials) {
       pointGeometry = geometry;
       pointMaterial = new THREE.MeshFaceMaterial(materials);
-      var point = new THREE.Mesh(geometry, pointMaterial);
-      point.position.x = 50;
-      point.position.y = 14;
-      scene.add(point);
       hideLoadding();
     });
   }
 
   function putElements() {
-    for (var i = 0; i < 160; i++) {
+    for (var i = 0; i < 130; i++) {
       var point = new THREE.Mesh(stonesGeometry, stonesMaterial);
-      point.position.x = pos_dist * Math.cos(2 * Math.PI * i / 160);
-      point.position.z = pos_dist * Math.sin(2 * Math.PI * i / 160);
-      point.position.y = Math.sin(i / 160 * Math.PI) * 20 + 2;
+      point.position.x = pos_dist * Math.cos(2 * Math.PI * i / 130);
+      point.position.z = pos_dist * Math.sin(2 * Math.PI * i / 130);
+      point.position.y = -10;
       scene.add(point);
       var tempElem = {
         type: 1,
@@ -274,9 +350,14 @@
       var temp = [];
       temp.push(tempElem);
       line.push(temp);
-      //scene.remove(point);
     }
   }
+
+  var current_put_level = 2;
+  var current_map_index = 0;
+  var current_put_index = 0;
+  var empty = 0;
+  var float_h = 0;
 
   function plane_fly() {
     a_speed += d_speed;
@@ -307,20 +388,80 @@
     if(currentNum >= loadNum) {
       var deg = Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
       island.rotation.y -= deg;
-      var cosNum = Math.cos(island.rotation.y);
-      var sinNum = Math.sin(island.rotation.y);
+
       pointLight.position.x = -Math.cos(island.rotation.y) * 50;
       pointLight.position.z = Math.sin(island.rotation.y) * 50;
       for (var i = 0; i < line.length; i++) {
-        for (var j = 0; j < line[i].length; j++) {
-          if (line[i][j].element.position.x > 48 && line[i][j].element.position.z > -2
-            && line[i][j].element.position.z < 0 && Math.abs(line[i][j].element.position.y - plane.position.y) < 2) {
+        var cosNum = Math.cos(island.rotation.y + 2 * Math.PI * i / line.length);
+        var sinNum = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length);
+        if (-cosNum * pos_dist < -40 && sinNum * pos_dist < 10 && sinNum * pos_dist > 0 && line[i].length > 0) { //clear the array
+          for (var j = 0; j < line[i].length; j++) {
             scene.remove(line[i][j].element);
-            line[i].splice(j, 1);
+          }
+          line[i].length = 0;
+        } else if (-cosNum * pos_dist < -40 && sinNum * pos_dist > -10 && sinNum * pos_dist < 0 && line[i].length == 0) {
+          if (empty <= 4) {
+            var point = new THREE.Mesh(stonesGeometry, stonesMaterial);
+            scene.add(point);
+            var tempElem = {
+              type: 1,
+              element: point
+            };
+            point.position.y = -10;
+            line[i].push(tempElem);
+            empty++;
           } else {
-            line[i][j].element.position.x = -Math.cos(island.rotation.y + 2 * Math.PI * i / line.length) * pos_dist;
-            line[i][j].element.position.z = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length) * pos_dist;
-            line[i][j].element.rotation.y = (island.rotation.y + 2 *Math.PI * i / line.length);
+            if (maps[current_put_level][current_map_index].length <= current_put_index) {
+              empty = 0;
+              current_map_index = Math.floor(Math.random() / 0.34); //random
+              current_put_index = 0;
+              float_h = (Math.random() - 0.5) * 6;
+            } else {
+              for (var j = 0; j < maps[current_put_level][current_map_index][current_put_index].length; j++) {
+                var point;
+                var tempElem;
+                console.log(maps[current_put_level][current_map_index]);
+                if (maps[current_put_level][current_map_index][current_put_index][j].type == 1) {
+                  point = new THREE.Mesh(stonesGeometry, stonesMaterial);
+                  scene.add(point);
+                  tempElem = {
+                    type: 1,
+                    element: point
+                  };
+                } else if (maps[current_put_level][current_map_index][current_put_index][j].type == 2) {
+                  point = new THREE.Mesh(bonusGeometry, bonusMaterial);
+                  scene.add(point);
+                  tempElem = {
+                    type: 2,
+                    element: point
+                  };
+                } else {
+                  point = new THREE.Mesh(pointGeometry, pointMaterial);
+                  scene.add(point);
+                  tempElem = {
+                    type: 3,
+                    element: point
+                  };
+                }
+                point.position.y = maps[current_put_level][current_map_index][current_put_index][j].h + float_h;
+                line[i].push(tempElem);
+              }
+              current_put_index++;
+            }
+          }
+        }
+        for (var j = 0; j < line[i].length; j++) { //碰撞检测
+          if (line[i][j].element.position.x > 48 && line[i][j].element.position.z > -2
+            && line[i][j].element.position.z < 2
+              && ((line[i][j].type == 1 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1.5)
+              || (line[i][j].type == 2 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1)
+              || (line[i][j].type == 3 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1))) {
+              scene.remove(line[i][j].element);
+              line[i].splice(j, 1);
+          } else {
+            line[i][j].element.position.x = -cosNum * pos_dist;
+            line[i][j].element.position.z = sinNum * pos_dist;
+            line[i][j].element.rotation.y = (island.rotation.y + 2 * Math.PI * i / line.length + Math.PI);
           }
         }
       }
