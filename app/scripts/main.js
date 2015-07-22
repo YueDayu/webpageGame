@@ -71,7 +71,7 @@
     scene.add(skyBox);
   }
 
-  function hideLoadding() {
+  function hideLoading() {
     currentNum++;
     if (currentNum >= loadNum) {
       $('#loading').fadeOut();
@@ -82,8 +82,6 @@
   }
 
   function init() {
-    $("#ui-start").fadeOut();
-
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = -4;
@@ -125,10 +123,14 @@
           if (fuel > 0) {
             engineAudio.play();
             if (plane && plane.position.y < 40) {
-              if (fly_degree > 90 || fly_degree < -90) {
-                d_speed = 0.3;
+              if (fuel > 0) {
+                if (fly_degree > 90 || fly_degree < -90) {
+                  d_speed = 0.3;
+                } else {
+                  d_speed = 0.2;
+                }
               } else {
-                d_speed = 0.2;
+                d_speed = -0.2;
               }
             }
           }
@@ -141,9 +143,7 @@
         d_speed = -0.2;
       }
     });
-
     is_playing = false;
-
     animate();
   }
 
@@ -162,7 +162,7 @@
       plane.position.x = pos_dist;
       plane.rotation.y = Math.PI;
       scene.add(plane);
-      hideLoadding();
+      hideLoading();
     });
   }
 
@@ -193,7 +193,7 @@
   function loadMap() {
     $.getJSON('images/map/map.json', function(data) {
       maps = data;
-      hideLoadding();
+      hideLoading();
     });
   }
 
@@ -204,7 +204,7 @@
       island.scale.set(10, 10, 10);
       island.position.y = -5;
       scene.add(island);
-      hideLoadding();
+      hideLoading();
     });
   }
 
@@ -214,7 +214,7 @@
       bonusGeometry = geometry;
       bonusMaterial = new THREE.MeshFaceMaterial(materials);
 
-      hideLoadding();
+      hideLoading();
     });
   }
 
@@ -224,7 +224,7 @@
       stonesGeometry = geometry;
       stonesMaterial = new THREE.MeshFaceMaterial(materials);
 
-      hideLoadding();
+      hideLoading();
     });
   }
 
@@ -233,7 +233,7 @@
     loader.load('images/model/point.json', function(geometry, materials) {
       pointGeometry = geometry;
       pointMaterial = new THREE.MeshFaceMaterial(materials);
-      hideLoadding();
+      hideLoading();
     });
   }
 
