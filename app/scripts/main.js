@@ -253,14 +253,23 @@
     }
   }
 
-  function plane_fly() {
+  function levelControl() {
     if (score < 50) {
-      current_put_level = 0;
+      if (current_put_level != 0 && current_map_index == 0) {
+        current_put_level = 0;
+      }
     } else if (score < 130) {
-      current_put_level = 1;
+      if (current_put_level != 1 && current_map_index == 0) {
+        current_put_level = 1;
+      }
     } else {
-      current_put_level = 2;
+      if (current_put_level != 2 && current_map_index == 0) {
+        current_put_level = 2;
+      }
     }
+  }
+
+  function fuelControl() {
     fuel -= 0.03;
     showFuelBar.fillStyle = "#000000";
     showFuelBar.fillRect(0, 0, 300, 200);
@@ -271,7 +280,15 @@
     } else {
       $('#no-fuel').show();
     }
-    //console.log(fuel);
+    if (fuel < 0) {
+      fuel = 0;
+    }
+    if (fuel > 100) {
+      fuel = 100;
+    }
+  }
+
+  function speedControl() {
     a_speed += d_speed;
     if (d_speed >= 0.3 && a_speed < -2.5) {
       a_speed = -2.5;
@@ -293,11 +310,40 @@
       }
     }
     if (d_speed < 0 && fly_degree >= -90 + a_speed && fly_degree <= -90 - a_speed) {
-        fly_degree = -90;
+      fly_degree = -90;
+    }
+  }
+
+  function planeControl() {
+    plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
+    if (plane.position.y <= 0) {
+      plane.position.y = 0;
+      onCollideGround();
+    }
+    plane.rotation.x = fly_degree * Math.PI / 180;
+    if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
+      model_rot_dir = -model_rot_dir;
+    }
+    var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
+    plane.rotation.z += model_rot_dir * rot_delta;
+  }
+
+  function cameraControl() {
+    var pos = plane.position.y * 1.1;
+    if (pos < 0) {
+      pos = 0;
+    }
+    camera.position.y = pos;
+  }
+
+  function plane_fly() {
+    levelControl();
+    fuelControl();
+    if (is_playing) {
+      speedControl();
     }
     if(currentNum >= loadNum) {
-      var deg = Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
-      island.rotation.y -= deg;
+      island.rotation.y -= Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
 
       pointLight.position.x = -Math.cos(island.rotation.y) * 50;
       pointLight.position.z = Math.sin(island.rotation.y) * 50;
@@ -311,14 +357,14 @@
           line[i].length = 0;
         } else if (-cosNum * pos_dist < -40 && sinNum * pos_dist > -10 && sinNum * pos_dist < 0 && line[i].length == 0) {
           if (empty <= 4) {
-            var point = new THREE.Mesh(stonesGeometry, stonesMaterial);
-            scene.add(point);
-            var tempElem = {
+            var hiddenPoint = new THREE.Mesh(stonesGeometry, stonesMaterial);
+            scene.add(hiddenPoint);
+            var hiddenPointTempElem = {
               type: 1,
-              element: point
+              element: hiddenPoint
             };
-            point.position.y = -10;
-            line[i].push(tempElem);
+            hiddenPoint.position.y = -10;
+            line[i].push(hiddenPointTempElem);
             empty++;
           } else {
             if (maps[current_put_level][current_map_index].length <= current_put_index) {
@@ -383,23 +429,8 @@
           }
         }
       }
-      plane.position.y += Math.sin(fly_degree * Math.PI / 180) * fly_speed;
-      if (plane.position.y <= 0) {
-        plane.position.y = 0;
-        onCollideGround();
-      }
-
-      plane.rotation.x = fly_degree * Math.PI / 180;
-      var pos = plane.position.y * 1.1;
-      if (pos < 0) {
-        pos = 0;
-      }
-      camera.position.y = pos;
-      if (plane.rotation.z >= 0.1 || plane.rotation.z <= -0.1) {
-        model_rot_dir = -model_rot_dir;
-      }
-      var rot_delta = Math.min(0.001, Math.max(0.0005, (0.1 - Math.abs(plane.rotation.z)) / 0.1 * 0.005));
-      plane.rotation.z += model_rot_dir * rot_delta;
+      planeControl();
+      cameraControl();
     }
   }
 
