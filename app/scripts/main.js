@@ -1,26 +1,11 @@
 ;(function () {
   'use strict';
   //models
-  var loadNum = 5;
+  var loadNum = 6;
   var currentNum = 0;
   var plane;
   var island;
   var skybox;
-  var horseNum = 5;
-  var birdsNum = 3;
-  var birdList = [];
-  var horseList = [];
-  var birdPos = [
-    {x:3, y:20, z:-35},
-    {x:6, y:24, z:-33},
-    {x:1, y:21, z:-30}
-  ];
-  var horsePos =
-    [{x:0, y:4.6, z:28},
-    {x:-1, y:4.1, z:30},
-    {x:5, y:4, z:30},
-    {x:10, y:5.1, z:25},
-    {x:8, y:3, z:33}];
   var line = [];
   var stonesGeometry, stonesMaterial;
   var pointGeometry, pointMaterial;
@@ -47,96 +32,10 @@
   var fuel = 100;
   var c = document.getElementById("bar");
   var showFuelBar = c.getContext("2d");
-  showFuelBar.fillStyle="#FF0000";
-  showFuelBar.fillRect(0, 0, 300, 200);
 
   //type: 1 stone | 2 bonus | 3 point
   //maps
-  var maps = [ //level 1-3
-    [
-      [
-        [{type: 3, h: 10}],
-        [{type: 3, h: 12}],
-        [{type: 3, h: 14}],
-        [{type: 3, h: 15}],
-        [{type: 3, h: 15.5}, {type: 1, h: 11}],
-        [{type: 3, h: 15}],
-        [{type: 3, h: 14}],
-        [{type: 3, h: 12}],
-        [{type: 2, h: 10}]
-      ],[
-      [{type: 3, h: 13}],
-      [{type: 3, h: 14}],
-      [{type: 3, h: 15}],
-      [{type: 3, h: 16}],
-      [{type: 3, h: 17}, {type: 1, h: 21}],
-      [{type: 3, h: 18}],
-      [{type: 3, h: 19}],
-      [{type: 2, h: 20}, {type: 1, h: 16}],
-      [{type: 3, h: 19}],
-      [{type: 3, h: 18}],
-      [{type: 3, h: 17}, {type: 1, h: 21}],
-      [{type: 3, h: 16}],
-      [{type: 3, h: 15}],
-      [{type: 3, h: 14}],
-      [{type: 3, h: 13}]
-    ],[
-      [{type: 3, h: 10}],
-      [{type: 3, h: 12}],
-      [{type: 3, h: 14}],
-      [{type: 3, h: 16}],
-      [{type: 3, h: 18}],
-      [{type: 3, h: 19}],
-      [{type: 2, h: 20}, {type: 1, h: 17}]
-    ]
-    ],[
-      [
-        [{type: 3, h: 10}],
-        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 18}],
-        [{type: 3, h: 10}, {type: 3, h: 19}],
-        [{type: 3, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 2, h: 19}],
-        [{type: 3, h: 10}, {type: 3, h: 19}],
-        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 18}],
-        [{type: 3, h: 10}]
-      ],
-      [
-        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}],
-        [{type: 3, h: 10}, {type: 3, h: 16}],
-        [{type: 2, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}],
-        [{type: 3, h: 10}, {type: 3, h: 16}],
-        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}]
-      ],
-      [
-        [{type: 3, h: 10}, {type: 3, h: 12}, {type: 3, h: 14}, {type: 3, h: 16}, {type: 3, h: 19}],
-        [{type: 3, h: 10}, {type: 3, h: 20}, {type: 1, h: 13}, {type: 1, h: 18}, {type: 3, h: 15}],
-        [{type: 3, h: 10}, {type: 2, h: 15}, {type: 3, h: 17}],
-        [{type: 3, h: 10}, {type: 1, h: 14}],
-        [{type: 3, h: 10}]
-      ]
-    ],[
-      [
-        [{type: 1, h: 11}],
-        [{type: 1, h: 12.5}, {type: 3, h: 9}],
-        [{type: 1, h: 7}, {type: 3, h: 11}, {type: 1, h: 15}],
-        [{type: 1, h: 9}, {type: 1, h: 17.5}, {type: 3, h: 13}],
-        [{type: 2, h: 14}]
-      ],
-      [
-        [{type: 1, h: 10}, {type: 1, h: 15}, {type: 1, h: 20}],
-        [{type: 3, h: 10}, {type: 3, h: 15}, {type: 3, h: 20}],
-        [{type: 3, h: 10}, {type: 2, h: 15}, {type: 3, h: 20}],
-        [{type: 3, h: 10}, {type: 3, h: 15}, {type: 3, h: 20}],
-        [{type: 1, h: 10}, {type: 1, h: 15}, {type: 1, h: 20}]
-      ],
-      [
-        [{type: 1, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 1, h: 19}],
-        [{type: 3, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
-        [{type: 2, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
-        [{type: 3, h: 10}, {type: 3, h: 13}, {type: 3, h: 16}, {type: 3, h: 19}],
-        [{type: 1, h: 10}, {type: 1, h: 13}, {type: 1, h: 16}, {type: 1, h: 19}]
-      ]
-    ]
-  ];
+  var maps;
   //Sound
   var pointAudio;
   var bonusAudio;
@@ -180,7 +79,6 @@
       UiStart();
     }
   }
-  var controls;
 
   function init() {
     $("#ui-start").fadeOut();
@@ -195,10 +93,6 @@
       y : 10,
       z : 0
     });
-    //TODO
-    //controls = new THREE.OrbitControls( camera );
-    //controls.center.set( 0, 0, 0 );
-    //TODO
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('container').appendChild(renderer.domElement);
@@ -217,6 +111,7 @@
     loadPoint();
     loadStones();
     loadSound();
+    loadMap();
 
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
@@ -294,65 +189,11 @@
     $('#show')[0].innerHTML = '0';
   }
 
-  //function loadBirds() {
-  //  var loader = new THREE.JSONLoader( true );
-  //  loader.load( "images/model/bird.json", function (geometry) {
-  //    var birdMat = new THREE.MeshLambertMaterial({color: 0xeeeeee, morphTargets: true, overdraw: 0.5});
-  //    for (var i = 0; i < birdsNum; i++) {
-  //      var bird = new THREE.Mesh(geometry, birdMat);
-  //      bird.scale.set(0.01, 0.01, 0.01);
-  //      bird.position.x = birdPos[i].x;
-  //      bird.position.y = birdPos[i].y;
-  //      bird.position.z = birdPos[i].z;
-  //      birdList.push(bird);
-  //      bird.rotation.y = Math.PI / 2;
-  //      scene.add(bird);
-  //    }
-  //    hideLoadding();
-  //  });
-  //}
-  //
-  //function loadHorse() {
-  //  var loader = new THREE.JSONLoader( true );
-  //  loader.load( "images/model/horse.json", function ( geometry ) {
-  //    var horseMat = new THREE.MeshLambertMaterial({color: 0x606060, morphTargets: true, overdraw: 0.5});
-  //    for (var i = 0; i < horseNum; i++) {
-  //      var horse = new THREE.Mesh(geometry, horseMat);
-  //      horse.scale.set(0.01, 0.01, 0.01);
-  //      horse.rotation.y = (Math.random() - 0.5) * 0.8 + Math.PI / 2;
-  //      horse.rotation.x = (Math.random() - 0.5) * 0.3;
-  //      horse.position.x = horsePos[i].x;
-  //      horse.position.y = horsePos[i].y;
-  //      horse.position.z = horsePos[i].z;
-  //      horseList.push(horse);
-  //      scene.add(horse);
-  //    }
-  //    hideLoadding();
-  //  });
-  //}
-
-  //TODO
-  function initObject() {
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push( new THREE.Vector3(0, 0, 150 ) );
-    geometry.vertices.push( new THREE.Vector3(0, 0, -150 ) );
-
-    var line;
-
-    for ( var i = 0; i <= 20; i ++ ) {
-      for (var j = 0; j < 5; j++) {
-        line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: 0x000000, opacity: 0.2}));
-        line.position.x = ( i * 10 ) - 100;
-        line.position.y = j * 10;
-        scene.add(line);
-
-        line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: 0x000000, opacity: 0.2}));
-        line.position.z = ( i * 10 ) - 100;
-        line.rotation.y = 90 * Math.PI / 180;
-        line.position.y = j * 10;
-        scene.add(line);
-      }
-    }
+  function loadMap() {
+    $.getJSON('images/map/map.json', function(data) {
+      maps = data;
+      hideLoadding();
+    });
   }
 
   function loadIsland() {
@@ -571,7 +412,6 @@
     var delta = clock.getDelta();
     THREE.AnimationHandler.update(3 * delta);
     if (is_playing) plane_fly();
-    //controls.update();
     renderer.render(scene, camera);
   }
 
