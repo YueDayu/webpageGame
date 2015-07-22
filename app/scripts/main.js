@@ -5,7 +5,7 @@
   var currentNum = 0;
   var plane;
   var island;
-  var skybox;
+  var skyBox;
   var line = [];
   var stonesGeometry, stonesMaterial;
   var pointGeometry, pointMaterial;
@@ -55,10 +55,10 @@
       'images/pics/0001.png',
       'images/pics/0003.png'
     ];
-    var cubemap = THREE.ImageUtils.loadTextureCube(urls);
-    cubemap.format = THREE.RGBFormat;
+    var cubeMap = THREE.ImageUtils.loadTextureCube(urls);
+    cubeMap.format = THREE.RGBFormat;
     var shader = THREE.ShaderLib["cube"];
-    shader.uniforms["tCube"].value = cubemap;
+    shader.uniforms["tCube"].value = cubeMap;
     var material = new THREE.ShaderMaterial({
       fragmentShader: shader.fragmentShader,
       vertexShader: shader.vertexShader,
@@ -66,8 +66,8 @@
       depthWrite: false,
       side: THREE.BackSide
     });
-    skybox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
-    scene.add(skybox);
+    skyBox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
+    scene.add(skyBox);
   }
 
   function hideLoadding() {
@@ -295,8 +295,6 @@
     if (d_speed < 0 && fly_degree >= -90 + a_speed && fly_degree <= -90 - a_speed) {
         fly_degree = -90;
     }
-    //TODO: debug
-    //fly_degree = 0;
     if(currentNum >= loadNum) {
       var deg = Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
       island.rotation.y -= deg;
