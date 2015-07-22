@@ -82,38 +82,38 @@
     loadMap();
     //add event listener
     window.addEventListener('resize', onWindowResize, false);
-    $(window).keydown(function(e) {
+    $(window).keypress(function(e) {
       if (e.which == 32 && currentNum >= loadNum) {
         if (!is_playing) {
           $('#ui-start').hide();
           is_playing = true;
           reset();
         } else {
-          if (fuel > 0) {
+          if (plane && plane.position.y < 40 && fuel > 0) {
             engineAudio.play();
-            if (plane && plane.position.y < 40) {
-              if (fuel > 0) {
-                if (fly_degree > 90 || fly_degree < -90) {
-                  d_speed = 0.3;
-                } else {
-                  d_speed = 0.2;
-                }
-              } else {
-                d_speed = -0.2;
-              }
+            if (fly_degree > 90 || fly_degree < -90) {
+              d_speed = 0.3;
+            } else {
+              d_speed = 0.2;
             }
+          } else {
+            planeDown();
           }
         }
       }
     });
     $(window).keyup(function(e) {
       if (e.which == 32) {
-        engineAudio.pause();
-        d_speed = -0.2;
+        planeDown();
       }
     });
     is_playing = false;
     animate();
+  }
+
+  function planeDown() {
+    engineAudio.pause();
+    d_speed = -0.2;
   }
 
   //resize
