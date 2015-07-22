@@ -47,39 +47,8 @@
   //state
   var is_playing;
 
-  function addEnvMap(scene) {
-    var urls = [
-      'images/pics/0004.png',
-      'images/pics/0002.png',
-      'images/pics/0006.png',
-      'images/pics/0005.png',
-      'images/pics/0001.png',
-      'images/pics/0003.png'
-    ];
-    var cubeMap = THREE.ImageUtils.loadTextureCube(urls);
-    cubeMap.format = THREE.RGBFormat;
-    var shader = THREE.ShaderLib["cube"];
-    shader.uniforms["tCube"].value = cubeMap;
-    var material = new THREE.ShaderMaterial({
-      fragmentShader: shader.fragmentShader,
-      vertexShader: shader.vertexShader,
-      uniforms: shader.uniforms,
-      depthWrite: false,
-      side: THREE.BackSide
-    });
-    skyBox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
-    scene.add(skyBox);
-  }
-
-  function hideLoading() {
-    currentNum++;
-    if (currentNum >= loadNum) {
-      $('#loading').fadeOut();
-      $('#score').fadeIn();
-      putElements();
-      UiStart();
-    }
-  }
+  //start!
+  init();
 
   function init() {
     scene = new THREE.Scene();
@@ -101,9 +70,9 @@
     scene.add(pointLight);
     ambientLight = new THREE.AmbientLight(0x999999);
     scene.add(ambientLight);
-
+    //load sky box
     addEnvMap(scene);
-
+    //load models
     loadPlane();
     loadIsland();
     loadBonus();
@@ -111,7 +80,7 @@
     loadStones();
     loadSound();
     loadMap();
-
+    //add event listener
     window.addEventListener('resize', onWindowResize, false);
     $(window).keydown(function(e) {
       if (e.which == 32 && currentNum >= loadNum) {
@@ -147,25 +116,36 @@
     animate();
   }
 
-  function loadPlane() {
-    var loader = new THREE.JSONLoader();
-    loader.load('images/model/plane.json', function(geometry, materials) {
-      for (var i = 0; i < materials.length; i++ ) {
-        var m = materials[i];
-        m.skinning = true;
-      }
-      plane = new THREE.SkinnedMesh(geometry, new THREE.MeshFaceMaterial(materials));
-      plane.position.y = 8;
-      var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
-      animation.play();
-      plane.scale.set(0.5, 0.5, 0.5);
-      plane.position.x = pos_dist;
-      plane.rotation.y = Math.PI;
-      scene.add(plane);
-      hideLoading();
-    });
+  //resize
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
   }
 
+  //main loop and render
+  function animate() {
+    requestAnimationFrame(animate);
+    var delta = clock.getDelta();
+    THREE.AnimationHandler.update(3 * delta);
+    if (is_playing) {
+      plane_fly()
+    }
+    renderer.render(scene, camera);
+  }
+
+  //end loading
+  function hideLoading() {
+    currentNum++;
+    if (currentNum >= loadNum) {
+      $('#loading').fadeOut();
+      $('#score').fadeIn();
+      putElements();
+      UiStart();
+    }
+  }
+
+  //reset game
   function reset() {
     for (var i = 0; i < line.length; i++) {
       for (var j = 0; j < line[i].length; j++) {
@@ -188,6 +168,50 @@
     score = 0;
     fuel = 100;
     $('#show')[0].innerHTML = '0';
+  }
+
+  //load functions
+  function addEnvMap(scene) {
+    var urls = [
+      'images/pics/0004.png',
+      'images/pics/0002.png',
+      'images/pics/0006.png',
+      'images/pics/0005.png',
+      'images/pics/0001.png',
+      'images/pics/0003.png'
+    ];
+    var cubeMap = THREE.ImageUtils.loadTextureCube(urls);
+    cubeMap.format = THREE.RGBFormat;
+    var shader = THREE.ShaderLib["cube"];
+    shader.uniforms["tCube"].value = cubeMap;
+    var material = new THREE.ShaderMaterial({
+      fragmentShader: shader.fragmentShader,
+      vertexShader: shader.vertexShader,
+      uniforms: shader.uniforms,
+      depthWrite: false,
+      side: THREE.BackSide
+    });
+    skyBox = new THREE.Mesh(new THREE.BoxGeometry(1000, 1000, 1000), material);
+    scene.add(skyBox);
+  }
+
+  function loadPlane() {
+    var loader = new THREE.JSONLoader();
+    loader.load('images/model/plane.json', function(geometry, materials) {
+      for (var i = 0; i < materials.length; i++ ) {
+        var m = materials[i];
+        m.skinning = true;
+      }
+      plane = new THREE.SkinnedMesh(geometry, new THREE.MeshFaceMaterial(materials));
+      plane.position.y = 8;
+      var animation = new THREE.Animation(plane, plane.geometry.animations[0]);
+      animation.play();
+      plane.scale.set(0.5, 0.5, 0.5);
+      plane.position.x = pos_dist;
+      plane.rotation.y = Math.PI;
+      scene.add(plane);
+      hideLoading();
+    });
   }
 
   function loadMap() {
@@ -213,7 +237,6 @@
     loader.load('images/model/bonus.json', function(geometry, materials) {
       bonusGeometry = geometry;
       bonusMaterial = new THREE.MeshFaceMaterial(materials);
-
       hideLoading();
     });
   }
@@ -223,7 +246,6 @@
     loader.load('images/model/stone.json', function(geometry, materials) {
       stonesGeometry = geometry;
       stonesMaterial = new THREE.MeshFaceMaterial(materials);
-
       hideLoading();
     });
   }
@@ -237,6 +259,25 @@
     });
   }
 
+  function loadSound() {
+    pointAudio = document.createElement("audio");
+    pointAudio.src = "images/music/note_2.mp3";
+
+    bonusAudio = document.createElement("audio");
+    bonusAudio.src = "images/music/megagem_6.mp3";
+
+    stoneAudio = document.createElement("audio");
+    stoneAudio.src = "images/music/cloud_hit.mp3";
+
+    hitGroundAudio = document.createElement("audio");
+    hitGroundAudio.src = "images/music/ground_hit.mp3";
+
+    engineAudio = document.createElement("audio");
+    engineAudio.src = "images/music/engine.mp3";
+    engineAudio.setAttribute("loop", true);
+  }
+
+  //add invisible elements
   function putElements() {
     for (var i = 0; i < 130; i++) {
       var point = new THREE.Mesh(stonesGeometry, stonesMaterial);
@@ -254,6 +295,7 @@
     }
   }
 
+  //controller functions
   function levelControl() {
     if (score < 50) {
       if (current_put_level != 0) {
@@ -377,6 +419,7 @@
     }
   }
 
+  //add element for a line
   function addElement(i) {
     var cosNum = Math.cos(island.rotation.y + 2 * Math.PI * i / line.length);
     var sinNum = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length);
@@ -437,6 +480,7 @@
     }
   }
 
+  //main loop function
   function plane_fly() {
     levelControl();
     fuelControl();
@@ -453,42 +497,6 @@
       cameraControl();
       islandControl();
     }
-  }
-
-
-
-  function animate() {
-    requestAnimationFrame(animate);
-    var delta = clock.getDelta();
-    THREE.AnimationHandler.update(3 * delta);
-    if (is_playing) plane_fly();
-    renderer.render(scene, camera);
-  }
-
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-  }
-
-  init();
-
-  function loadSound() {
-    pointAudio = document.createElement("audio");
-    pointAudio.src = "images/music/note_2.mp3";
-
-    bonusAudio = document.createElement("audio");
-    bonusAudio.src = "images/music/megagem_6.mp3";
-
-    stoneAudio = document.createElement("audio");
-    stoneAudio.src = "images/music/cloud_hit.mp3";
-
-    hitGroundAudio = document.createElement("audio");
-    hitGroundAudio.src = "images/music/ground_hit.mp3";
-
-    engineAudio = document.createElement("audio");
-    engineAudio.src = "images/music/engine.mp3";
-    engineAudio.setAttribute("loop", true);
   }
 
   function UiStart() {
