@@ -585,19 +585,19 @@
 
   function loadSound() {
     pointAudio = document.createElement("audio");
-    pointAudio.src = "/images/music/note_2.mp3";
+    pointAudio.src = "images/music/note_2.mp3";
 
     bonusAudio = document.createElement("audio");
-    bonusAudio.src = "/images/music/megagem_6.mp3";
+    bonusAudio.src = "images/music/megagem_6.mp3";
 
     stoneAudio = document.createElement("audio");
-    stoneAudio.src = "/images/music/cloud_hit.mp3";
+    stoneAudio.src = "images/music/cloud_hit.mp3";
 
     hitGroundAudio = document.createElement("audio");
-    hitGroundAudio.src = "/images/music/ground_hit.mp3";
+    hitGroundAudio.src = "images/music/ground_hit.mp3";
 
     engineAudio = document.createElement("audio");
-    engineAudio.src = "/images/music/engine.mp3";
+    engineAudio.src = "images/music/engine.mp3";
     engineAudio.setAttribute("loop", true);
   }
 
