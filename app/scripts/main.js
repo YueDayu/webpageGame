@@ -32,6 +32,7 @@
   var fuel = 100;
   var c = document.getElementById("bar");
   var showFuelBar = c.getContext("2d");
+  var clock = new THREE.Clock();
 
   //type: 1 stone | 2 bonus | 3 point
   //maps
@@ -87,17 +88,17 @@
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = -4;
     camera.position.x = 60;
-    camera.position.y = 10;
+    camera.position.y = 11;
     camera.lookAt({
       x : 0,
-      y : 10,
-      z : 0
+      y : 5,
+      z : -3
     });
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('container').appendChild(renderer.domElement);
     pointLight = new THREE.PointLight( 0xaaaaaa, 0.75 );
-    pointLight.position.set( 100, 100, 0 );
+    pointLight.position.set(-50, 100, 0);
     pointLight.position.multiplyScalar(300);
     scene.add(pointLight);
     ambientLight = new THREE.AmbientLight(0x999999);
@@ -255,16 +256,19 @@
 
   function levelControl() {
     if (score < 50) {
-      if (current_put_level != 0 && current_map_index == 0) {
+      if (current_put_level != 0) {
         current_put_level = 0;
+        empty = 0;
       }
     } else if (score < 130) {
-      if (current_put_level != 1 && current_map_index == 0) {
+      if (current_put_level != 1) {
         current_put_level = 1;
+        empty = 0;
       }
     } else {
-      if (current_put_level != 2 && current_map_index == 0) {
+      if (current_put_level != 2) {
         current_put_level = 2;
+        empty = 0;
       }
     }
   }
@@ -336,6 +340,103 @@
     camera.position.y = pos;
   }
 
+  function islandControl() {
+    island.rotation.y -= Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
+  }
+
+  function lightControl() {
+    pointLight.position.x = -Math.cos(island.rotation.y) * 50;
+    pointLight.position.z = Math.sin(island.rotation.y) * 50;
+  }
+
+  function collisionDetection(i) {
+    var cosNum = Math.cos(island.rotation.y + 2 * Math.PI * i / line.length);
+    var sinNum = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length);
+    for (var j = 0; j < line[i].length; j++) { //碰撞检测
+      if (line[i][j].element.position.x > 48 && line[i][j].element.position.z > -2
+        && line[i][j].element.position.z < 2
+        && ((line[i][j].type == 1 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1.5)
+        || (line[i][j].type == 2 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1)
+        || (line[i][j].type == 3 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1))) {
+        if(line[i][j].type == 3) {
+          score++;
+        } else if (line[i][j].type == 1) {
+          fuel -= 10;
+        } else {
+          fuel += 10;
+        }
+        $('#show')[0].innerHTML = score;
+        scene.remove(line[i][j].element);
+        onCollidePoint(line[i][j]);
+        line[i].splice(j, 1);
+      } else {
+        line[i][j].element.position.x = -cosNum * pos_dist;
+        line[i][j].element.position.z = sinNum * pos_dist;
+        line[i][j].element.rotation.y = (island.rotation.y + 2 * Math.PI * i / line.length + Math.PI);
+      }
+    }
+  }
+
+  function addElement(i) {
+    var cosNum = Math.cos(island.rotation.y + 2 * Math.PI * i / line.length);
+    var sinNum = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length);
+    if (-cosNum * pos_dist < -40 && sinNum * pos_dist < 10 && sinNum * pos_dist > 0 && line[i].length > 0) { //clear the array
+      for (var j = 0; j < line[i].length; j++) {
+        scene.remove(line[i][j].element);
+      }
+      line[i].length = 0;
+    } else if (-cosNum * pos_dist < -40 && sinNum * pos_dist > -10 && sinNum * pos_dist < 0 && line[i].length == 0) {
+      if (empty <= 4) {
+        var hiddenPoint = new THREE.Mesh(stonesGeometry, stonesMaterial);
+        scene.add(hiddenPoint);
+        var hiddenPointTempElem = {
+          type: 1,
+          element: hiddenPoint
+        };
+        hiddenPoint.position.y = -10;
+        line[i].push(hiddenPointTempElem);
+        empty++;
+      } else {
+        if (maps[current_put_level][current_map_index].length <= current_put_index) {
+          empty = 0;
+          current_map_index = Math.floor(Math.random() / 0.34); //random
+          current_put_index = 0;
+          float_h = (Math.random() - 0.5) * 6;
+        } else {
+          for (var k = 0; k < maps[current_put_level][current_map_index][current_put_index].length; k++) {
+            var point;
+            var tempElem;
+            if (maps[current_put_level][current_map_index][current_put_index][k].type == 1) {
+              point = new THREE.Mesh(stonesGeometry, stonesMaterial);
+              scene.add(point);
+              tempElem = {
+                type: 1,
+                element: point
+              };
+            } else if (maps[current_put_level][current_map_index][current_put_index][k].type == 2) {
+              point = new THREE.Mesh(bonusGeometry, bonusMaterial);
+              scene.add(point);
+              tempElem = {
+                type: 2,
+                element: point
+              };
+            } else {
+              point = new THREE.Mesh(pointGeometry, pointMaterial);
+              scene.add(point);
+              tempElem = {
+                type: 3,
+                element: point
+              };
+            }
+            point.position.y = maps[current_put_level][current_map_index][current_put_index][k].h + float_h;
+            line[i].push(tempElem);
+          }
+          current_put_index++;
+        }
+      }
+    }
+  }
+
   function plane_fly() {
     levelControl();
     fuelControl();
@@ -343,98 +444,18 @@
       speedControl();
     }
     if(currentNum >= loadNum) {
-      island.rotation.y -= Math.atan(fly_speed * Math.cos(fly_degree * Math.PI / 180) / pos_dist);
-
-      pointLight.position.x = -Math.cos(island.rotation.y) * 50;
-      pointLight.position.z = Math.sin(island.rotation.y) * 50;
       for (var i = 0; i < line.length; i++) {
-        var cosNum = Math.cos(island.rotation.y + 2 * Math.PI * i / line.length);
-        var sinNum = Math.sin(island.rotation.y + 2 *Math.PI * i / line.length);
-        if (-cosNum * pos_dist < -40 && sinNum * pos_dist < 10 && sinNum * pos_dist > 0 && line[i].length > 0) { //clear the array
-          for (var j = 0; j < line[i].length; j++) {
-            scene.remove(line[i][j].element);
-          }
-          line[i].length = 0;
-        } else if (-cosNum * pos_dist < -40 && sinNum * pos_dist > -10 && sinNum * pos_dist < 0 && line[i].length == 0) {
-          if (empty <= 4) {
-            var hiddenPoint = new THREE.Mesh(stonesGeometry, stonesMaterial);
-            scene.add(hiddenPoint);
-            var hiddenPointTempElem = {
-              type: 1,
-              element: hiddenPoint
-            };
-            hiddenPoint.position.y = -10;
-            line[i].push(hiddenPointTempElem);
-            empty++;
-          } else {
-            if (maps[current_put_level][current_map_index].length <= current_put_index) {
-              empty = 0;
-              current_map_index = Math.floor(Math.random() / 0.34); //random
-              current_put_index = 0;
-              float_h = (Math.random() - 0.5) * 6;
-            } else {
-              for (var j = 0; j < maps[current_put_level][current_map_index][current_put_index].length; j++) {
-                var point;
-                var tempElem;
-                if (maps[current_put_level][current_map_index][current_put_index][j].type == 1) {
-                  point = new THREE.Mesh(stonesGeometry, stonesMaterial);
-                  scene.add(point);
-                  tempElem = {
-                    type: 1,
-                    element: point
-                  };
-                } else if (maps[current_put_level][current_map_index][current_put_index][j].type == 2) {
-                  point = new THREE.Mesh(bonusGeometry, bonusMaterial);
-                  scene.add(point);
-                  tempElem = {
-                    type: 2,
-                    element: point
-                  };
-                } else {
-                  point = new THREE.Mesh(pointGeometry, pointMaterial);
-                  scene.add(point);
-                  tempElem = {
-                    type: 3,
-                    element: point
-                  };
-                }
-                point.position.y = maps[current_put_level][current_map_index][current_put_index][j].h + float_h;
-                line[i].push(tempElem);
-              }
-              current_put_index++;
-            }
-          }
-        }
-        for (var j = 0; j < line[i].length; j++) { //碰撞检测
-          if (line[i][j].element.position.x > 48 && line[i][j].element.position.z > -2
-            && line[i][j].element.position.z < 2
-              && ((line[i][j].type == 1 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1.5)
-              || (line[i][j].type == 2 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1)
-              || (line[i][j].type == 3 && Math.abs(line[i][j].element.position.y - plane.position.y) < 1))) {
-              if(line[i][j].type == 3) {
-                score++;
-              } else if (line[i][j].type == 1) {
-                fuel -= 10;
-              } else {
-                fuel += 10;
-              }
-              $('#show')[0].innerHTML = score;
-              scene.remove(line[i][j].element);
-              onCollidePoint(line[i][j]);
-              line[i].splice(j, 1);
-          } else {
-            line[i][j].element.position.x = -cosNum * pos_dist;
-            line[i][j].element.position.z = sinNum * pos_dist;
-            line[i][j].element.rotation.y = (island.rotation.y + 2 * Math.PI * i / line.length + Math.PI);
-          }
-        }
+        addElement(i);
+        collisionDetection(i);
       }
+      lightControl();
       planeControl();
       cameraControl();
+      islandControl();
     }
   }
 
-  var clock = new THREE.Clock();
+
 
   function animate() {
     requestAnimationFrame(animate);
